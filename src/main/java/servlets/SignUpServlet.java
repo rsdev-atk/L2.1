@@ -2,6 +2,7 @@ package servlets;
 
 import accounts.AccountService;
 import accounts.UserProfile;
+import com.google.gson.Gson;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -22,6 +23,29 @@ public class SignUpServlet extends HttpServlet {
     public void doGet(HttpServletRequest request,
                       HttpServletResponse response) throws ServletException, IOException {
 
+        String sessionId = request.getSession().getId();
+        UserProfile profile = accountService.getUserBySessionId(sessionId);
+
+        if (profile == null) {
+            response.setContentType("text/html;charset=utf-8");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        } else {
+            Gson gson = new Gson();
+            String json = gson.toJson(profile);
+            response.setContentType("text/html;charset=utf-8");
+            response.getWriter().println(json);
+            response.setStatus(HttpServletResponse.SC_OK);
+        }
+
+
+
+
+    }
+
+
+    public void doPost(HttpServletRequest request,
+                       HttpServletResponse response) throws ServletException, IOException {
+
         String login = request.getParameter("login");
         String pass = request.getParameter("pass");
 
@@ -40,13 +64,13 @@ public class SignUpServlet extends HttpServlet {
         }
 
 
-
-
-    }
-
-
-    public void doPost(HttpServletRequest request,
-                       HttpServletResponse response) throws ServletException, IOException {
+        //????
+        accountService.addSession(request.getSession().getId(), profile);
+        Gson gson = new Gson();
+        String json = gson.toJson(profile);
+        response.setContentType("text/html;charset=utf-8");
+        response.getWriter().println(json);
+        response.setStatus(HttpServletResponse.SC_OK);
 
     }
 
